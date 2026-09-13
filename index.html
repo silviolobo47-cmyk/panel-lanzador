@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel Administrador</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#0f2027">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Panel">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height:100vh;
+    background: linear-gradient(135deg, #0f2027, #1C5D8C, #2c5364);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    overflow:hidden;
+  }
+  .card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 28px;
+    padding: 36px 26px;
+    width: min(340px, 88vw);
+    text-align:center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    animation: rise .5s ease;
+  }
+  @keyframes rise { from { opacity:0; transform:translateY(16px);} to {opacity:1; transform:translateY(0);} }
+
+  .logo {
+    width:64px; height:64px; margin:0 auto 14px;
+    border-radius:18px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+  }
+  h1 { font-size:1.25rem; font-weight:600; margin-bottom:4px; letter-spacing:.2px; }
+  p.sub { font-size:0.85rem; opacity:0.65; margin-bottom:26px; }
+
+  .dots { display:flex; justify-content:center; gap:16px; margin-bottom:28px; }
+  .dot {
+    width:15px; height:15px; border-radius:50%;
+    border:2px solid rgba(255,255,255,0.45);
+    transition: all .18s ease;
+  }
+  .dot.filled { background:#4FD1C5; border-color:#4FD1C5; box-shadow:0 0 10px #4FD1C5aa; }
+  .dot.shake { animation: shake .4s; }
+  @keyframes shake {
+    0%,100% { transform:translateX(0); }
+    25% { transform:translateX(-6px); }
+    75% { transform:translateX(6px); }
+  }
+
+  .keypad {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+  }
+  .key {
+    padding:20px 0; font-size:1.4rem; font-weight:500;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.13);
+    border-radius:18px; color:#fff;
+  }
+  .key:active { background:rgba(255,255,255,0.28); transform:scale(0.96); }
+  .key.action { background:transparent; border:none; font-size:1rem; opacity:0.75; }
+  #error { color:#FF8A8A; font-size:0.8rem; height:18px; margin-top:14px; }
+
+  #menu { display:none; }
+  #menu .logo { margin-bottom:18px; }
+  .app-link {
+    display:flex; align-items:center; gap:12px;
+    padding:18px; margin-bottom:12px;
+    background:rgba(255,255,255,0.08); border-radius:18px;
+    color:#fff; text-decoration:none; font-weight:500; font-size:1rem;
+    border:1px solid rgba(255,255,255,0.13);
+    transition: background .15s;
+  }
+  .app-link:active { background:rgba(255,255,255,0.25); }
+  .app-link .emoji { font-size:1.3rem; }
+  .app-link.disabled { opacity:0.45; }
+
+  #logout {
+    margin-top:8px; background:none; border:none; color:rgba(255,255,255,0.55);
+    font-size:0.8rem; padding:8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="login">
+  <img class="logo" src="icon-192.png" alt="logo">
+  <h1>Panel Administrador</h1>
+  <p class="sub">Ingresá tu PIN</p>
+  <div class="dots">
+    <div class="dot" id="d0"></div>
+    <div class="dot" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
+  </div>
+  <div class="keypad">
+    <button class="key" onclick="press(1)">1</button>
+    <button class="key" onclick="press(2)">2</button>
+    <button class="key" onclick="press(3)">3</button>
+    <button class="key" onclick="press(4)">4</button>
+    <button class="key" onclick="press(5)">5</button>
+    <button class="key" onclick="press(6)">6</button>
+    <button class="key" onclick="press(7)">7</button>
+    <button class="key" onclick="press(8)">8</button>
+    <button class="key" onclick="press(9)">9</button>
+    <button class="key action" onclick="clearPin()">Borrar</button>
+    <button class="key" onclick="press(0)">0</button>
+    <button class="key action" onclick="back()">←</button>
+  </div>
+  <div id="error"></div>
+</div>
+
+<div class="card" id="menu">
+  <img class="logo" src="icon-192.png" alt="logo">
+  <h1>Mis Apps</h1>
+  <p class="sub">Elegí a dónde entrar</p>
+  <a class="app-link" href="https://silviolobo47-cmyk.github.io/Discapacidad-/">
+    <span class="emoji">🗂️</span> Sección Discapacidad
+  </a>
+  <a class="app-link" href="https://silviolobo47-cmyk.github.io/MUNICIPIOS-INSTITUCIONES-CUPO/">
+    <span class="emoji">🏛️</span> Cupos
+  </a>
+  <a class="app-link disabled" href="#" onclick="alert('Falta configurar la URL de Fichas Técnicas'); return false;">
+    <span class="emoji">📋</span> Fichas Técnicas
+  </a>
+  <button id="logout" onclick="logout()">Cerrar sesión</button>
+</div>
+
+<script>
+const PIN = "4783";
+let entered = "";
+const SESSION_KEY = "sd_session";
+const SESSION_HOURS = 12;
+
+function checkSession(){
+  const raw = localStorage.getItem(SESSION_KEY);
+  if(!raw) return false;
+  try{
+    const s = JSON.parse(raw);
+    if(Date.now() < s.expires) return true;
+  }catch(e){}
+  return false;
+}
+
+function showMenu(){
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('menu').style.display = 'block';
+}
+function showLogin(){
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('login').style.display = 'block';
+}
+
+function press(n){
+  if(entered.length >= 4) return;
+  entered += n;
+  updateDots();
+  if(entered.length === 4) setTimeout(validate, 150);
+}
+function back(){ entered = entered.slice(0,-1); updateDots(); }
+function clearPin(){ entered = ""; updateDots(); }
+function updateDots(){
+  for(let i=0;i<4;i++){
+    document.getElementById('d'+i).classList.toggle('filled', i < entered.length);
+  }
+}
+function validate(){
+  if(entered === PIN){
+    const expires = Date.now() + SESSION_HOURS*60*60*1000;
+    localStorage.setItem(SESSION_KEY, JSON.stringify({expires}));
+    showMenu();
+  } else {
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach(d => d.classList.add('shake'));
+    document.getElementById('error').textContent = "PIN incorrecto";
+    setTimeout(()=>{
+      dots.forEach(d => d.classList.remove('shake'));
+      entered = "";
+      updateDots();
+      document.getElementById('error').textContent="";
+    }, 900);
+  }
+}
+function logout(){
+  localStorage.removeItem(SESSION_KEY);
+  showLogin();
+}
+
+if(checkSession()) showMenu();
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
